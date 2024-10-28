@@ -1,5 +1,6 @@
 import os
 
+from selenium.webdriver import ActionChains
 from selenium.webdriver.common.by import By
 from traceback import print_stack
 from selenium.webdriver.support.ui import WebDriverWait
@@ -75,7 +76,20 @@ class SeleniumDriver():
             self.log.info("Element found with locator " + locator + "and locatorType: " + locatorType)
         except:
             self.log.info("Element not found with locator " + locator + "and locatorType: " + locatorType)
+            return None
         return element
+
+    # Searches and returns a web elements
+    def get_elements(self, locator, locatorType="id"):
+        try:
+            locator_type = locatorType.lower()
+            by_type = self.get_by_type(locator_type)
+            elements = self.driver.find_elements(by_type, locator)
+            self.log.info(f"Found {len(elements)} elements with locator {locator} and locatorType {locatorType}")
+            return elements
+        except Exception as e:
+            self.log.error(f"Elements not found with locator {locator}. Error: {e}")
+            return []
 
     # Clicks on a web element
     def element_click(self, locator, locatorType="id"):
@@ -86,6 +100,15 @@ class SeleniumDriver():
         except:
             self.log.info("Cannot click on the element with locator: " + locator + " locatorType: " + locatorType)
             print_stack()
+
+    def mouse_hover(self, element):
+        try:
+            # WebDriverWait(self.driver, 10).until(EC.visibility_of(element))
+            actions = ActionChains(self.driver)
+            actions.move_to_element(element).perform()
+            self.log.info(f"Hovered over element: {element.text}")
+        except Exception as e:
+            self.log.warning(f"Warning: Could not hover over element. Proceeding anyway. Error: {e}")
 
     # Sends input to a web element
     def send_keys(self, data, locator, locatorType="id"):
